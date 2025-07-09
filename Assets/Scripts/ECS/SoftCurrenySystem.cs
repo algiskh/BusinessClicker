@@ -1,54 +1,89 @@
 using Leopotam.EcsLite;
-using BusinessGame.Components;
+using BusinessGame.ECS.Components;
 
-public class SoftCurrencySystem : IEcsRunSystem
+namespace BusinessGame.ECS
 {
-	public void Run(IEcsSystems systems)
+	/// <summary>
+	/// Принимаем выплачиваемую игровую валюту
+	/// Принимаем запросы на трату игровой валюты
+	/// Если хватает, то списываем валюту и отправляем одобрения
+	/// </summary>
+	public class SoftCurrencySystem : IEcsRunSystem
 	{
-		var world = systems.GetWorld();
-
-		// singleton (ID = 0)
-		int currencyEntity = 0;
-		var currencyPool = world.GetPool<SoftCurrencyComponent>();
-
-		ref var currency = ref currencyPool.Get(currencyEntity);
-
-		var addSoftPool = world.GetPool<AddSoftCurrencyComponent>();
-		var addSoftFilter = world.Filter<AddSoftCurrencyComponent>().End();
-
-		foreach (var entity in addSoftFilter)
+		public void Run(IEcsSystems systems)
 		{
-			ref var addRequest = ref addSoftPool.Get(entity);
+			var world = systems.GetWorld();
 
-			currency.Value += addRequest.Amount;
+			int currencyEntity = 0;
+			var currencyPool = world.GetPool<SoftCurrency>();
+
+			ref var currency = ref currencyPool.Get(currencyEntity);
+
+			var change = TryAddSoft(world) - TrySpendSoft(world, currency.Value);
+
+			currency.Value += change;
+			if (change != 0)
+			{
+				SendUIUpdate(world, currency.Value);
+			}
 		}
 
-
-		var spendRequestPool = world.GetPool<SpendSoftCurrencyRequest>();
-		var upgradeRequestPool = world.GetPool<UpgradeRequest>();
-
-		var filter = world.Filter<SpendSoftCurrencyRequest>().End();
-
-		foreach (var entity in filter)
+		private long TryAddSoft(EcsWorld world)
 		{
-			ref var request = ref spendRequestPool.Get(entity);
+			var addSoftPool = world.GetPool<AddSoftRequest>();
+			var addSoftFilter = world.Filter<AddSoftRequest>().End();
+			long addSoft = 0;
 
-			if (currency.Value >= request.Amount)
+			foreach (var entity in addSoftFilter)
 			{
-				currency.Value -= request.Amount;
+				ref var addRequest = ref addSoftPool.Get(entity);
 
-				// Создаём UpgradeRequest-ивент для target (request.Target)
-				var upgradeEntity = world.NewEntity();
-				ref var upgradeRequest = ref upgradeRequestPool.Add(upgradeEntity);
-				upgradeRequest.Target = request.Target; // <- смотри ниже комментарий
-
-				// Можешь добавить дополнительные поля (например, уровень апгрейда)
+				addSoft += addRequest.Amount;
 			}
-			else
+			return addSoft > 0 ? addSoft : 0;
+		}
+
+		private long TrySpendSoft(EcsWorld world, long soft)
+		{
+			var requestSpendPool = world.GetPool<RequestSpendSoft>();
+
+			var filter = world.Filter<RequestSpendSoft>().End();
+			long spendSoft = 0;
+			foreach (var entity in filter)
 			{
-				// Здесь можешь создать Fail-ивент
+				ref var request = ref requestSpendPool.Get(entity);
+
+				if (soft >= request.Amount)
+				{
+					spendSoft += request.Amount;
+
+					SendApprove(world, request.Target);
+				}
+				else
+				{
+					// FAIL EVENT
+				}
+				world.DelEntity(entity);
 			}
-			world.DelEntity(entity);
+			return spendSoft;
+		}
+
+		private void SendUIUpdate(EcsWorld world, long soft)
+		{
+			var updateSoftPool = world.GetPool<UpdateSoftUI>();
+
+			var updateSoftUIEntity = world.NewEntity();
+			ref var upgradeRequest = ref updateSoftPool.Add(updateSoftUIEntity);
+			upgradeRequest.Value = soft;
+		}
+
+		private void SendApprove(EcsWorld world, int targetEntity)
+		{
+			var approveSpendPool = world.GetPool<ApproveSpendSoft>();
+
+			var upgradeEntity = world.NewEntity();
+			ref var upgradeRequest = ref approveSpendPool.Add(upgradeEntity);
+			upgradeRequest.Target = targetEntity;
 		}
 	}
 }

@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fac7b5828eb6f04598ee4dedf709b26, type: 3}
   m_Name: BusinessConfigHolder
   m_EditorClassIdentifier: 
+  _localization: {fileID: 11400000, guid: c0a189640d43b3e49a9291a7002c2567, type: 2}
   _configs:
   - {fileID: 11400000, guid: d1ad160df0a14e949bb1b62f7c0a60a8, type: 2}
   - {fileID: 11400000, guid: 28b5d989a48d1964b955500eef9e5616, type: 2}
   - {fileID: 11400000, guid: ae72fa618cb3a6147b1506e4d5c6536f, type: 2}
   - {fileID: 11400000, guid: 41c0654912ed50640889f80c442d1840, type: 2}
   - {fileID: 11400000, guid: d9a7ce36f5e16e34996dd6482da1ca0c, type: 2}
+  _prefab: {fileID: 9144508027058590303, guid: 3506e0ac14e8fe143afaa9c00e60bbf9, type: 3}

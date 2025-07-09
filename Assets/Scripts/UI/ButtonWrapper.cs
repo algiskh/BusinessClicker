@@ -17,5 +17,13 @@ namespace BusinessGame.UI
 		{
 			IsClicked = true;
 		}
-    }
+		
+		public void Unclick()
+		{
+			IsClicked = false;
+		}
+
+		public void SetInteractable(bool interactable) =>
+			_button.interactable = interactable;
+	}
 }

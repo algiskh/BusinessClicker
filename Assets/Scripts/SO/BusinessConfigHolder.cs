@@ -1,4 +1,6 @@
+using BusinessGame.ECS.Components;
 using BusinessGame.UI;
+using System;
 using UnityEngine;
 
 namespace BusinessGame.Configs
@@ -9,9 +11,20 @@ namespace BusinessGame.Configs
 		)]
 	public class ConfigHolder : ScriptableObject
     {
+		[Serializable]
+		public struct FirstTimeData
+		{
+			public string[] BusinessIds;
+			public int StartLevel;
+		}
+
 		[SerializeField] private BusinessLocalization _localization;
 		[SerializeField] private Config[] _configs;
-        public Config[] Configs => _configs;
+		[SerializeField] private FirstTimeData _firstTimeData;
+		[SerializeField] private BusinessView _prefab;
+		public Config[] Configs => _configs;
+		public BusinessView Prefab => _prefab;
+		public FirstTimeData FirstPlayData => _firstTimeData;
 
 		public Config GetConfig(string id)
 		{
