@@ -1,8 +1,9 @@
 using BusinessGame.UI;
-using System.Collections.Generic;
 using ConfigHolder = BusinessGame.Configs.ConfigHolder;
 using Config = BusinessGame.Configs.Config;
 using UpgradeConfig = BusinessGame.Configs.Config.UpgradeConfig;
+using BusinessGame.Serialization;
+
 
 
 namespace BusinessGame.ECS.Components
@@ -10,7 +11,7 @@ namespace BusinessGame.ECS.Components
 	#region StartComponents
 	public struct ConfigHolderComponent
 	{
-		public ConfigHolder ConfigHolder;
+		public ConfigHolder Value;
 	}
 
 	public struct ConfigComponent
@@ -42,8 +43,9 @@ namespace BusinessGame.ECS.Components
 	{
 	}
 
-	public struct LoadedData
+	public struct LoadedDataComponent
 	{
+		public SerializationData Value;
 	}
 	#endregion
 
@@ -117,6 +119,7 @@ namespace BusinessGame.ECS.Components
 
 	public struct UpdateViewRequest
 	{
+		public bool IsGlobal;
 		public int Target;
 	}
 

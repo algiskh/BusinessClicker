@@ -29,8 +29,14 @@ namespace BusinessGame.UI
 			return _entries
 			.Where(e => e.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(e => e.Key)
-			.Select(e => e.Key)
+			.Select(e => e.Text)
 			.ToArray();
+		}
+
+		public string GetTitle(Config config)
+		{
+			string key = $"{config.Id}_title";
+			return _entries.FirstOrDefault(e => e.Key == key).Text;
 		}
 
 		public string GetText(string key)

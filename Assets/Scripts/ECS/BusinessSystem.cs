@@ -1,9 +1,9 @@
+using BusinessGame.Configs;
 using BusinessGame.ECS.Components;
 using Leopotam.EcsLite;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 
 namespace BusinessGame.ECS
 {
@@ -12,37 +12,37 @@ namespace BusinessGame.ECS
 		public void Init(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
-
 			TryToDeserialize(world);
 		}
 
 		public void Run(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
+			ProcessTimers(world);
+			ProcessApproveRequests(world);
+		}
 
-			// Pools
+		private void ProcessTimers(EcsWorld world)
+		{
 			var configPool = world.GetPool<ConfigComponent>();
 			var timerPool = world.GetPool<Timer>();
 			var incomePool = world.GetPool<Income>();
 			var addSoftPool = world.GetPool<AddSoftRequest>();
 			var levelPool = world.GetPool<Level>();
 			var businessViewPool = world.GetPool<BusinessViewComponent>();
-			var upgradesPool = world.GetPool<Upgrades>();
 
-			var businessFilter = world.Filter<BusinessViewComponent>()
+			var filter = world.Filter<BusinessViewComponent>()
 				.Inc<ConfigComponent>()
 				.Inc<Level>()
 				.Inc<Timer>()
 				.Inc<Upgrades>()
 				.End();
 
-			// 1. Iterate timers
-			foreach (var entity in businessFilter)
+			foreach (var entity in filter)
 			{
 				ref var timer = ref timerPool.Get(entity);
 				ref var level = ref levelPool.Get(entity);
 				ref var businessView = ref businessViewPool.Get(entity);
-				ref var upgrades = ref upgradesPool.Get(entity);
 				ref var income = ref incomePool.Get(entity);
 
 				if (level.Value < 1)
@@ -62,50 +62,55 @@ namespace BusinessGame.ECS
 				}
 				businessView.Value.UpdateSlider();
 			}
+		}
 
-			// 2. Check
+		private void ProcessApproveRequests(EcsWorld world)
+		{
+			var configPool = world.GetPool<ConfigComponent>();
+			var incomePool = world.GetPool<Income>();
+			var levelPool = world.GetPool<Level>();
+			var upgradesPool = world.GetPool<Upgrades>();
 			var approvePool = world.GetPool<RequestSpendSoft>();
 			var updateViewPool = world.GetPool<UpdateViewRequest>();
-			var approveFilter = world.Filter<RequestSpendSoft>().End();
 
+			var approveFilter = world.Filter<RequestSpendSoft>().End();
 			var approvesToRemove = new List<int>();
 
 			foreach (var approveEntity in approveFilter)
 			{
 				var approve = approvePool.Get(approveEntity);
-
 				approvesToRemove.Add(approveEntity);
 
 				if (!approve.IsApproved)
 					continue;
+
 				var targetEntity = approve.TargetEntity;
 				ref var income = ref incomePool.Get(targetEntity);
 				ref var targetLevel = ref levelPool.Get(targetEntity);
 				ref var upgrades = ref upgradesPool.Get(targetEntity);
 
-				if (approve.Purpose == SpendPurpose.LevelUp)
+				switch (approve.Purpose)
 				{
-					if (!levelPool.Has(approve.TargetEntity))
-						continue;
-					targetLevel.Value++;
-				}
-				else if (approve.Purpose == SpendPurpose.Upgrade)
-				{
-					if (!upgradesPool.Has(targetEntity))
-						continue;
-					var upgradeIndex = approve.AdditionalTarget; // index in array of upgrades
-					if (upgradeIndex < 0 || upgradeIndex >= upgrades.Value.Length)
-						continue;
-					upgrades.Value[upgradeIndex].IsObtained = true;
-
-					ref var businessView = ref businessViewPool.Get(approve.TargetEntity);
+					case SpendPurpose.LevelUp:
+						if (!levelPool.Has(targetEntity))
+							continue;
+						targetLevel.Value++;
+						break;
+					case SpendPurpose.Upgrade:
+						if (!upgradesPool.Has(targetEntity))
+							continue;
+						var upgradeIndex = approve.AdditionalTarget;
+						if (upgradeIndex < 0 || upgradeIndex >= upgrades.Value.Length)
+							continue;
+						upgrades.Value[upgradeIndex].IsObtained = true;
+						break;
 				}
 
 				income.Value = configPool.Get(targetEntity).Value.GetIncome(targetLevel.Value, upgrades.Value);
 
 				var updateRequestEntity = world.NewEntity();
 				ref var updateRequest = ref updateViewPool.Add(updateRequestEntity);
-				updateRequest.Target = approve.TargetEntity;
+				updateRequest.Target = targetEntity;
 			}
 
 			foreach (var approveEntity in approvesToRemove)
@@ -117,28 +122,79 @@ namespace BusinessGame.ECS
 
 		private void TryToDeserialize(EcsWorld world)
 		{
-			var loadFilter = world.Filter<LoadedData>().End();
-
-			if (loadFilter.GetEntitiesCount() > 0)
+			if (world.TryGetAsSingleton<LoadedDataComponent>(out var save))
 			{
-				var entity = loadFilter.GetRawEntities()[0];
-				var loadPool = world.GetPool<LoadedData>();
-				var save = loadPool.Get(entity);
-
 				Deserialize(world, save);
 
-				foreach (var e in loadFilter)
-					world.DelEntity(e);
+				world.DeleteAllWith<LoadedDataComponent>();
 			}
 			else
 			{
 				SetStartParameters(world);
 			}
+
+			var updateViewPool = world.GetPool<UpdateViewRequest>();
+			var updateRequestEntity = world.NewEntity();
+			ref var updateRequest = ref updateViewPool.Add(updateRequestEntity);
+			updateRequest.IsGlobal = true;
 		}
 
-		private void Deserialize(EcsWorld world, LoadedData data)
+		private void Deserialize(EcsWorld world, LoadedDataComponent data)
 		{
+			var saveData = data.Value;
 
+			var configHolder = world.GetAsSingleton<ConfigHolderComponent>();
+			var configPool = world.GetPool<ConfigComponent>();
+			var levelPool = world.GetPool<Level>();
+			var timerPool = world.GetPool<Timer>();
+			var upgradesPool = world.GetPool<Upgrades>();
+
+			// Сначала строим быструю карту "id бизнеса" -> "entity"
+			var businessEntitiesById = new Dictionary<string, int>();
+
+			var filter = world.Filter<BusinessViewComponent>()
+				.Inc<ConfigComponent>()
+				.Inc<Level>()
+				.Inc<Timer>()
+				.Inc<Upgrades>()
+				.End();
+
+			foreach (var entity in filter)
+			{
+				var id = configPool.Get(entity).Value.Id;
+				businessEntitiesById[id] = entity;
+			}
+
+			foreach (var business in saveData.Businesses)
+			{
+				if (!businessEntitiesById.TryGetValue(business.Id, out var entity))
+				{
+					Debug.LogWarning($"No active entity for business id: {business.Id}");
+					continue;
+				}
+
+				ref var level = ref levelPool.Get(entity);
+				level.Value = business.Level;
+
+				ref var timer = ref timerPool.Get(entity);
+				timer.Value = business.Timer;
+
+				ref var upgrades = ref upgradesPool.Get(entity);
+				var config = configHolder.Value.GetConfig(business.Id);
+
+				if (config != null)
+				{
+					if (upgrades.Value == null || upgrades.Value.Length != config.Upgrades.Length)
+						upgrades.Value = config.Upgrades.ToArray();
+
+					for (var i = 0; i < config.Upgrades.Length; i++)
+					{
+						upgrades.Value[i].IsObtained = (i < business.Upgrades.Length) && business.Upgrades[i];
+					}
+				}
+			}
+
+			Debug.Log($"Save loaded (entities updated)");
 		}
 
 		private void SetStartParameters(EcsWorld world)
@@ -152,7 +208,7 @@ namespace BusinessGame.ECS
 
 			var configHolderFilter = world.Filter<ConfigHolderComponent>().End();
 			var configHolderComponent = configHolderPool.Get(configHolderFilter.GetRawEntities()[0]);
-			var firstData = configHolderComponent.ConfigHolder.FirstPlayData;
+			var firstData = configHolderComponent.Value.FirstPlayData;
 
 			var businessEntities = world.Filter<ConfigComponent>()
 				.Inc<BusinessViewComponent>()
@@ -180,9 +236,7 @@ namespace BusinessGame.ECS
 
 				ref var upgrades = ref upgradesPool.Get(b);
 				for (int i = 0; i < upgrades.Value.Length; i++)
-				{
 					upgrades.Value[i].IsObtained = false;
-				}
 			}
 		}
 	}

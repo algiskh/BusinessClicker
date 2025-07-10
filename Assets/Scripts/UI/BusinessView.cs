@@ -28,12 +28,13 @@ namespace BusinessGame.UI
 		public ButtonWrapper LevelUpButton => _levelUpButton;
 		public UpgradeView[] UpgradeViews => _upgradeButtons;
 
-		public void Initialize(int entityId, EcsWorld world, Config config)
+		public void Initialize(int entityId, EcsWorld world, Config config, string title)
 		{
 			EntityId = entityId;
 			World = world;
 			_config = config;
 			_slider.maxValue = _config.Delay;
+			_titleText = _titleText;
 			UpdateStats();
 		}
 
@@ -81,8 +82,6 @@ namespace BusinessGame.UI
 		{
 			var pool = World.GetPool<Income>();
 			var income = pool.Get(EntityId);
-
-			Debug.Log($"Доход сейчас {income.Value}");
 			return income.Value;
 		}
 

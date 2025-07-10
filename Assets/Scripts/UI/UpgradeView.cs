@@ -15,7 +15,7 @@ public class UpgradeView : MonoBehaviour
 	public int Hash => GetHashCode();
 	public ButtonWrapper UpgradeButton => _upgradeButton;
 
-	public void Init(Config upgrade, string title)
+	public void Initialize(Config upgrade, string title)
 	{
 		Config = upgrade;
 		_upgradeButton.SetInteractable(true);

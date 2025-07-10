@@ -1,5 +1,12 @@
+using BusinessGame.Configs;
 using BusinessGame.ECS.Components;
 using Leopotam.EcsLite;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using SerializationData = BusinessGame.Serialization.SerializationData;
+using Timer = BusinessGame.ECS.Components.Timer;
 
 namespace BusinessGame.ECS
 {
@@ -8,7 +15,6 @@ namespace BusinessGame.ECS
 		public void Init(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
-
 			TryToLoad(world);
 		}
 
@@ -16,8 +22,8 @@ namespace BusinessGame.ECS
 		{
 			var world = systems.GetWorld();
 
-		if (world.TryGetAsSingleton<OnRequestSave>(out var save))
-			{ 
+			if (world.TryGetAsSingleton<OnRequestSave>(out _))
+			{
 				world.DeleteAllWith<OnRequestSave>();
 				TryToSave(world);
 			}
@@ -25,20 +31,94 @@ namespace BusinessGame.ECS
 
 		private void TryToLoad(EcsWorld world)
 		{
-			UnityEngine.Debug.Log($"Try To Load");
+			var configHolder = world.GetAsSingleton<ConfigHolderComponent>();
+			var savePath = configHolder.Value.SavePath;
 
-			return;
-			var hasBeenLoaded = world.NewEntity(); // push serialized data further in the pipeline
-			var loadPool = world.GetPool<LoadedData>();
-			ref var loaded = ref loadPool.Add(hasBeenLoaded);
+			if (!File.Exists(savePath))
+			{
+				Debug.Log($"Save file not found: {savePath}");
+				return;
+			}
 
-			// loaded = serialized data;
+			try
+			{
+				var json = File.ReadAllText(savePath);
+				var saveData = JsonUtility.FromJson<SerializationData>(json);
+
+				if (saveData == null)
+				{
+					Debug.LogError("Failed to deserialize save file.");
+					return;
+				}
+
+				ref var currency = ref world.GetAsSingleton<SoftCurrency>();
+				currency.Value = saveData.SoftCurrency;
+
+				var loadedDataEntity = world.NewEntity();
+				ref var loadedData = ref world.GetPool<LoadedDataComponent>().Add(loadedDataEntity);
+				loadedData.Value = saveData;
+
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Error loading save: {ex}");
+			}
 		}
-
 
 		public void TryToSave(EcsWorld world)
 		{
-			// send save
+			Debug.Log($"Try to save from ECS!");
+			var configHolder = world.GetAsSingleton<ConfigHolderComponent>();
+			var savePath = configHolder.Value.SavePath;
+
+			var currency = world.GetAsSingleton<SoftCurrency>();
+
+			var configPool = world.GetPool<ConfigComponent>();
+			var timerPool = world.GetPool<Timer>();
+			var levelPool = world.GetPool<Level>();
+			var upgradesPool = world.GetPool<Upgrades>();
+			var businessViewPool = world.GetPool<BusinessViewComponent>();
+
+			var filter = world.Filter<BusinessViewComponent>()
+				.Inc<ConfigComponent>()
+				.Inc<Level>()
+				.Inc<Timer>()
+				.Inc<Upgrades>()
+				.End();
+
+			var businessesToSave = new List<SerializationData.SerializedBusiness>();
+
+			foreach (var entity in filter)
+			{
+				var upgrades = upgradesPool.Get(entity);
+
+				var businessToSave = new SerializationData.SerializedBusiness
+				{
+					Id = configPool.Get(entity).Value.Id,
+					Level = levelPool.Get(entity).Value,
+					Timer = timerPool.Get(entity).Value,
+					Upgrades = upgrades.Value.Select(b => b.IsObtained).ToArray()
+				};
+
+				businessesToSave.Add(businessToSave);
+			}
+
+			var newSave = new SerializationData
+			{
+				SoftCurrency = currency.Value,
+				Businesses = businessesToSave.ToArray()
+			};
+
+			try
+			{
+				var json = JsonUtility.ToJson(newSave, true);
+				File.WriteAllText(savePath, json);
+				Debug.Log($"Save complete: {savePath}");
+			}
+			catch (System.Exception ex)
+			{
+				Debug.LogError($"Error saving file: {ex}");
+			}
 		}
 	}
 }

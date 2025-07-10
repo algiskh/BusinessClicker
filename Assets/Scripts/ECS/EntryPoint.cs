@@ -3,6 +3,7 @@ using BusinessGame.ECS;
 using BusinessGame.ECS.Components;
 using BusinessGame.UI;
 using Leopotam.EcsLite;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -20,13 +21,16 @@ public class EntryPoint : MonoBehaviour
 		_world = new EcsWorld();
 		_systems = new EcsSystems(_world);
 
+		// Add observer for application quit and unfocus
+		gameObject.AddComponent<QuitObserver>().Initialize(_world);
+
 		SetupSpawnData();
 
 		_systems
-			.Add(new SaveLoadSystem())
 			.Add(new SpawnSystem())
-			.Add(new BusinessSystem())
 			.Add(new SoftCurrencySystem())
+			.Add(new SaveLoadSystem())
+			.Add(new BusinessSystem())
 			.Add(new UISystem())
 
 			.Init();
@@ -50,7 +54,7 @@ public class EntryPoint : MonoBehaviour
 		ref var topPanel = ref topPanelPool.Add(appEntity);
 
 
-		config.ConfigHolder = _configHolder;
+		config.Value = _configHolder;
 		parent.Parent = _slotsParent;
 		topPanel.Value = _topPanel;
 	}

@@ -34,15 +34,15 @@ public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не
 		var incomePool = world.GetPool<Income>();
 		var levelPool = world.GetPool<Level>();
 
-		var configHolderComponent = configHolderPool.Get(configEntity);
+		var mainConfig = configHolderPool.Get(configEntity);
 		var objectsParentComponent = parentPool.Get(configEntity);
 
-		foreach (var config in configHolderComponent.ConfigHolder.Configs)
+		foreach (var config in mainConfig.Value.Configs)
 		{
 			var businessEntity = world.NewEntity();
 
 			var businessView = Object.Instantiate(
-				configHolderComponent.ConfigHolder.Prefab,
+				mainConfig.Value.Prefab,
 				objectsParentComponent.Parent);
 
 			ref var configComponent = ref configPool.Add(businessEntity);
@@ -68,10 +68,10 @@ public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не
 				upgrades.Value[i].Hash = businessView.UpgradeViews[i] != null
 					? businessView.UpgradeViews[i].Hash
 					: -1;
-				businessViewComponent.Value.UpgradeViews[i].Init(upgrades.Value[i], "TITLE");
+				businessViewComponent.Value.UpgradeViews[i].Initialize(upgrades.Value[i], mainConfig.Value.GetUpgradeKeys(config)[i]);
 			}
 
-			businessView.Initialize(businessEntity, world, config);
+			businessView.Initialize(businessEntity, world, config, mainConfig.Value.GetTitle(config));
 		}
 	}
 }
