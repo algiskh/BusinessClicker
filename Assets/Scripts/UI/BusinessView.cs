@@ -34,7 +34,7 @@ namespace BusinessGame.UI
 			World = world;
 			_config = config;
 			_slider.maxValue = _config.Delay;
-			_titleText = _titleText;
+			_titleText.text = title;
 			UpdateStats();
 		}
 
@@ -43,7 +43,7 @@ namespace BusinessGame.UI
 			var currentLevel = GetCurrentLevel();
 			_levelField.text = currentLevel.ToString();
 			_incomeField.text = $"{GetIncome()}$";
-			_lvlUpField.text = $"Цена: {GetNextLevelUpPrice(currentLevel)}$";
+			_lvlUpField.text = $"Price: ${GetNextLevelUpPrice(currentLevel)}";
 		}
 
 		public void UpdateSlider()

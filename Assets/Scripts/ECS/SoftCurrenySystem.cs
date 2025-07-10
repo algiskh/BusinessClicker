@@ -5,11 +5,6 @@ using Unity.Collections;
 
 namespace BusinessGame.ECS
 {
-	/// <summary>
-	/// Принимаем выплачиваемую игровую валюту
-	/// Принимаем запросы на трату игровой валюты
-	/// Если хватает, то списываем валюту и отправляем одобрения
-	/// </summary>
 	public class SoftCurrencySystem : IEcsInitSystem, IEcsRunSystem
 	{
 		public void Init(IEcsSystems systems)
@@ -75,18 +70,14 @@ namespace BusinessGame.ECS
 			foreach (var entity in filter)
 			{
 				ref var request = ref requestSpendPool.Get(entity);
-				UnityEngine.Debug.Log($"Поступил запрос на {request.TargetEntity} на сумму {request.Amount}." +
-					$" Сейчас денег {soft}");
 				if (soft >= request.Amount)
 				{
-					UnityEngine.Debug.Log($"Запрос на {request.TargetEntity} одобрен.");
+
 					spendSoft += request.Amount;
 					request.IsApproved = true;
 				}
 				else
 				{
-					UnityEngine.Debug.Log($"В запросе на {request.TargetEntity} на сумму {request.Amount}." +
-	$" Отказать!");
 					world.DelEntity(entity);
 				}
 			}
@@ -105,7 +96,6 @@ namespace BusinessGame.ECS
 		private void SendApprove(EcsWorld world, int targetEntity)
 		{
 			var approveSpendPool = world.GetPool<ApproveSpendSoft>();
-			UnityEngine.Debug.Log($"Одобрено: {targetEntity}");
 			var upgradeEntity = world.NewEntity();
 			ref var upgradeRequest = ref approveSpendPool.Add(upgradeEntity);
 			upgradeRequest.Target = targetEntity;

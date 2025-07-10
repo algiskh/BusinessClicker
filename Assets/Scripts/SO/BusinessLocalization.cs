@@ -25,7 +25,7 @@ namespace BusinessGame.UI
 
 		public string[] GetUpgradeKeys(Config config)
 		{
-			string prefix = $"{config.Id}_upgrade";
+			string prefix = $"{config.Id}_Upgrade";
 			return _entries
 			.Where(e => e.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(e => e.Key)
@@ -35,8 +35,8 @@ namespace BusinessGame.UI
 
 		public string GetTitle(Config config)
 		{
-			string key = $"{config.Id}_title";
-			return _entries.FirstOrDefault(e => e.Key == key).Text;
+			string key = $"{config.Id}_Title";
+			return _entries.FirstOrDefault(e => e.Key.StartsWith(key)).Text;
 		}
 
 		public string GetText(string key)

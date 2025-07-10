@@ -13,41 +13,53 @@ namespace BusinessGame.ECS
 		{
 			var world = systems.GetWorld();
 
-			// +++++ Pools +++++
-			var businessViewPool = world.GetPool<BusinessViewComponent>();
-			var configPool = world.GetPool<ConfigComponent>();
-			var requestSpendPool = world.GetPool<RequestSpendSoft>();
-			var levelPool = world.GetPool<Level>();
-			var updateViewPool = world.GetPool<UpdateViewRequest>();
-			var upgradesPool = world.GetPool<Upgrades>();
+			UpdateTopPanelIfNeeded(world);
 
-			// +++++ Refresh Top Panel +++++
+			var updateViewPool = world.GetPool<UpdateViewRequest>();
+			bool updateAll = ShouldUpdateAllViews(world, updateViewPool, out var entitiesToUpdate);
+
+			UpdateBusinessViews(world, updateAll, entitiesToUpdate);
+
+			world.DeleteAllWith<UpdateViewRequest>();
+		}
+
+		private void UpdateTopPanelIfNeeded(EcsWorld world)
+		{
 			if (world.TryGetAsSingleton<UpdateSoftUI>(out var update))
 			{
 				ref var topPanel = ref world.GetAsSingleton<TopPanelComponent>();
 				topPanel.Value.UpdateView(update.Value);
-
 				world.DeleteAllWith<UpdateSoftUI>();
 			}
+		}
 
-			// +++++ Get all entities to update +++++
-			var entitiesToUpdate = new HashSet<int>();
-			bool isGlobalUpdate = false;
+		private bool ShouldUpdateAllViews(EcsWorld world, EcsPool<UpdateViewRequest> updateViewPool, out HashSet<int> entitiesToUpdate)
+		{
+			entitiesToUpdate = new HashSet<int>();
+			bool isGlobal = false;
 
 			foreach (var reqEntity in world.Filter<UpdateViewRequest>().End())
 			{
 				ref var req = ref updateViewPool.Get(reqEntity);
 				if (req.IsGlobal)
 				{
-					isGlobalUpdate = true;
+					isGlobal = true;
+					break;
 				}
-				else
-				{
-					entitiesToUpdate.Add(req.Target);
-				}
+				entitiesToUpdate.Add(req.Target);
 			}
 
-			// +++++ Update business views +++++
+			return isGlobal;
+		}
+
+		private void UpdateBusinessViews(EcsWorld world, bool updateAll, HashSet<int> entitiesToUpdate)
+		{
+			var businessViewPool = world.GetPool<BusinessViewComponent>();
+			var configPool = world.GetPool<ConfigComponent>();
+			var requestSpendPool = world.GetPool<RequestSpendSoft>();
+			var levelPool = world.GetPool<Level>();
+			var upgradesPool = world.GetPool<Upgrades>();
+
 			foreach (var entity in world.Filter<BusinessViewComponent>()
 										.Inc<ConfigComponent>()
 										.Inc<Level>()
@@ -55,48 +67,70 @@ namespace BusinessGame.ECS
 										.End())
 			{
 				ref var businessView = ref businessViewPool.Get(entity);
-				var button = businessView.Value.LevelUpButton;
-				var upgradeButtons = businessView.Value.UpgradeViews;
 
-				ref var config = ref configPool.Get(entity);
-				ref var level = ref levelPool.Get(entity);
+				HandleUpgradeClicks(world, entity, ref businessView, requestSpendPool, upgradesPool, configPool, levelPool);
+				HandleLevelUpClick(world, entity, ref businessView, requestSpendPool, configPool, levelPool);
 
-				for (var i = 0; i < upgradeButtons.Length; i++)
-				{
-					var upgradeView = upgradeButtons[i];
-					if (upgradeView.UpgradeButton.IsClicked)
-					{
-						UnityEngine.Debug.Log($"Клик по кнопке Upgrade для {config.Value.Id} (уровень {level.Value}) для {entity}");
-						int request = world.NewEntity();
-						ref var requestSpend = ref requestSpendPool.Add(request);
-						ref var upgrades = ref upgradesPool.Get(entity);
-						requestSpend.Amount = upgradeView.Config.Price;
-						requestSpend.TargetEntity = entity;
-						requestSpend.Purpose = SpendPurpose.Upgrade;
-						requestSpend.AdditionalTarget = i; // Upgrade index
-						upgradeView.UpgradeButton.Unclick();
-					}
-				}
-
-				if (button.IsClicked)
-				{
-					UnityEngine.Debug.Log($"Клик по кнопке LevelUp для {config.Value.Id} (уровень {level.Value}) для {entity}");
-					int request = world.NewEntity();
-					ref var requestSpend = ref requestSpendPool.Add(request);
-					requestSpend.Amount = config.Value.LevelUpPrice(level.Value);
-					requestSpend.TargetEntity = entity;
-					requestSpend.Purpose = SpendPurpose.LevelUp;
-					button.Unclick();
-				}
-
-				if (isGlobalUpdate || entitiesToUpdate.Contains(entity))
+				if (updateAll || entitiesToUpdate.Contains(entity))
 				{
 					businessView.Value.UpdateStats();
 					businessView.Value.UpdateUpgrades();
 				}
 			}
+		}
 
-			world.DeleteAllWith<UpdateViewRequest>();
+		private void HandleUpgradeClicks(
+			EcsWorld world,
+			int entity,
+			ref BusinessViewComponent businessView,
+			EcsPool<RequestSpendSoft> requestSpendPool,
+			EcsPool<Upgrades> upgradesPool,
+			EcsPool<ConfigComponent> configPool,
+			EcsPool<Level> levelPool)
+		{
+			var upgradeViews = businessView.Value.UpgradeViews;
+			ref var config = ref configPool.Get(entity);
+			ref var level = ref levelPool.Get(entity);
+
+			for (var i = 0; i < upgradeViews.Length; i++)
+			{
+				var upgradeView = upgradeViews[i];
+				if (upgradeView.UpgradeButton.IsClicked)
+				{
+					UnityEngine.Debug.Log($"Клик по кнопке Upgrade для {config.Value.Id} (уровень {level.Value}) для {entity}");
+					int request = world.NewEntity();
+					ref var requestSpend = ref requestSpendPool.Add(request);
+					requestSpend.Amount = upgradeView.Config.Price;
+					requestSpend.TargetEntity = entity;
+					requestSpend.Purpose = SpendPurpose.Upgrade;
+					requestSpend.AdditionalTarget = i;
+					upgradeView.UpgradeButton.Unclick();
+				}
+			}
+		}
+
+		private void HandleLevelUpClick(
+			EcsWorld world,
+			int entity,
+			ref BusinessViewComponent businessView,
+			EcsPool<RequestSpendSoft> requestSpendPool,
+			EcsPool<ConfigComponent> configPool,
+			EcsPool<Level> levelPool)
+		{
+			var levelUpButton = businessView.Value.LevelUpButton;
+			ref var config = ref configPool.Get(entity);
+			ref var level = ref levelPool.Get(entity);
+
+			if (levelUpButton.IsClicked)
+			{
+				UnityEngine.Debug.Log($"Клик по кнопке LevelUp для {config.Value.Id} (уровень {level.Value}) для {entity}");
+				int request = world.NewEntity();
+				ref var requestSpend = ref requestSpendPool.Add(request);
+				requestSpend.Amount = config.Value.LevelUpPrice(level.Value);
+				requestSpend.TargetEntity = entity;
+				requestSpend.Purpose = SpendPurpose.LevelUp;
+				levelUpButton.Unclick();
+			}
 		}
 	}
 }

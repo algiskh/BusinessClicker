@@ -149,7 +149,6 @@ namespace BusinessGame.ECS
 			var timerPool = world.GetPool<Timer>();
 			var upgradesPool = world.GetPool<Upgrades>();
 
-			// Сначала строим быструю карту "id бизнеса" -> "entity"
 			var businessEntitiesById = new Dictionary<string, int>();
 
 			var filter = world.Filter<BusinessViewComponent>()
