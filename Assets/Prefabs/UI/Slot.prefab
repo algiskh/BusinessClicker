@@ -1113,6 +1113,7 @@ GameObject:
   - component: {fileID: 8883773270559565268}
   - component: {fileID: 4322532837608538199}
   - component: {fileID: 1038829138188015167}
+  - component: {fileID: 7243599627175543698}
   m_Layer: 5
   m_Name: LvlUpButton
   m_TagString: Untagged
@@ -1249,6 +1250,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &7243599627175543698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6543524063774854135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9ce1695910de049890d4854f310a91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _button: {fileID: 4322532837608538199}
 --- !u!1 &7619530617977960424
 GameObject:
   m_ObjectHideFlags: 0
@@ -1374,7 +1388,10 @@ MonoBehaviour:
   _incomeField: {fileID: 3269327650709996611}
   _lvlUpField: {fileID: 6780263028845624604}
   _slider: {fileID: 4203483658481401396}
-  _upgradeButtons: []
+  _levelUpButton: {fileID: 7243599627175543698}
+  _upgradeButtons:
+  - {fileID: 7571913501980865158}
+  - {fileID: 7125181903454137686}
 --- !u!1 &8406444890502127224
 GameObject:
   m_ObjectHideFlags: 0
@@ -1973,6 +1990,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3289415893447293886, guid: 88f16f5ba2007744fbd09b35240faa29, type: 3}
   m_PrefabInstance: {fileID: 7467119060739005117}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7125181903454137686 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 378638860554958827, guid: 88f16f5ba2007744fbd09b35240faa29, type: 3}
+  m_PrefabInstance: {fileID: 7467119060739005117}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 853e558bf8776854f9b506b3ec7b9622, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7806397591184524653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2135,3 +2163,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3289415893447293886, guid: 88f16f5ba2007744fbd09b35240faa29, type: 3}
   m_PrefabInstance: {fileID: 7806397591184524653}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7571913501980865158 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 378638860554958827, guid: 88f16f5ba2007744fbd09b35240faa29, type: 3}
+  m_PrefabInstance: {fileID: 7806397591184524653}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 853e558bf8776854f9b506b3ec7b9622, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

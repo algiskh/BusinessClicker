@@ -1,6 +1,5 @@
 using BusinessGame.ECS.Components;
 using Leopotam.EcsLite;
-using System.Diagnostics;
 
 namespace BusinessGame.ECS
 {
@@ -17,13 +16,9 @@ namespace BusinessGame.ECS
 		{
 			var world = systems.GetWorld();
 
-			var saveFilter = world.Filter<OnRequestSave>().End();
-			if (saveFilter.GetEntitiesCount() > 0)
-			{
-				foreach (var entity in saveFilter)
-				{
-					world.DelEntity(entity);
-				}
+		if (world.TryGetAsSingleton<OnRequestSave>(out var save))
+			{ 
+				world.DeleteAllWith<OnRequestSave>();
 				TryToSave(world);
 			}
 		}

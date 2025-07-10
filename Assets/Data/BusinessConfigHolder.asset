@@ -19,4 +19,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ae72fa618cb3a6147b1506e4d5c6536f, type: 2}
   - {fileID: 11400000, guid: 41c0654912ed50640889f80c442d1840, type: 2}
   - {fileID: 11400000, guid: d9a7ce36f5e16e34996dd6482da1ca0c, type: 2}
+  _firstTimeData:
+    BusinessIds:
+    - Business_1
+    StartLevel: 1
   _prefab: {fileID: 9144508027058590303, guid: 3506e0ac14e8fe143afaa9c00e60bbf9, type: 3}

@@ -1,5 +1,7 @@
 using Leopotam.EcsLite;
 using BusinessGame.ECS.Components;
+using System.Collections.Generic;
+using Unity.Collections;
 
 namespace BusinessGame.ECS
 {
@@ -8,17 +10,34 @@ namespace BusinessGame.ECS
 	/// Принимаем запросы на трату игровой валюты
 	/// Если хватает, то списываем валюту и отправляем одобрения
 	/// </summary>
-	public class SoftCurrencySystem : IEcsRunSystem
+	public class SoftCurrencySystem : IEcsInitSystem, IEcsRunSystem
 	{
+		public void Init(IEcsSystems systems)
+		{
+			var world = systems.GetWorld();
+
+			var currencyEntity = world.NewEntity();
+			var currencyPool = world.GetPool<SoftCurrency>();
+			ref var currency = ref currencyPool.Add(currencyEntity);
+
+		}
+
 		public void Run(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
 
-			int currencyEntity = 0;
 			var currencyPool = world.GetPool<SoftCurrency>();
+			var currencyFilter = world.Filter<SoftCurrency>().End();
 
-			ref var currency = ref currencyPool.Get(currencyEntity);
+			foreach (var entity in currencyFilter)
+			{
+				IterateCurrency(world, entity, currencyPool);
+			}
+		}
 
+		private void IterateCurrency(EcsWorld world, int entity, EcsPool<SoftCurrency> currencyPool)
+		{
+			ref var currency = ref currencyPool.Get(entity);
 			var change = TryAddSoft(world) - TrySpendSoft(world, currency.Value);
 
 			currency.Value += change;
@@ -34,12 +53,16 @@ namespace BusinessGame.ECS
 			var addSoftFilter = world.Filter<AddSoftRequest>().End();
 			long addSoft = 0;
 
+			var entitiesToRemove = new List<int>();
 			foreach (var entity in addSoftFilter)
 			{
 				ref var addRequest = ref addSoftPool.Get(entity);
 
 				addSoft += addRequest.Amount;
+				entitiesToRemove.Add(entity);
 			}
+			entitiesToRemove.ForEach(e => world.DelEntity(e));
+
 			return addSoft > 0 ? addSoft : 0;
 		}
 
@@ -52,18 +75,20 @@ namespace BusinessGame.ECS
 			foreach (var entity in filter)
 			{
 				ref var request = ref requestSpendPool.Get(entity);
-
+				UnityEngine.Debug.Log($"Поступил запрос на {request.TargetEntity} на сумму {request.Amount}." +
+					$" Сейчас денег {soft}");
 				if (soft >= request.Amount)
 				{
+					UnityEngine.Debug.Log($"Запрос на {request.TargetEntity} одобрен.");
 					spendSoft += request.Amount;
-
-					SendApprove(world, request.Target);
+					request.IsApproved = true;
 				}
 				else
 				{
-					// FAIL EVENT
+					UnityEngine.Debug.Log($"В запросе на {request.TargetEntity} на сумму {request.Amount}." +
+	$" Отказать!");
+					world.DelEntity(entity);
 				}
-				world.DelEntity(entity);
 			}
 			return spendSoft;
 		}
@@ -80,7 +105,7 @@ namespace BusinessGame.ECS
 		private void SendApprove(EcsWorld world, int targetEntity)
 		{
 			var approveSpendPool = world.GetPool<ApproveSpendSoft>();
-
+			UnityEngine.Debug.Log($"Одобрено: {targetEntity}");
 			var upgradeEntity = world.NewEntity();
 			ref var upgradeRequest = ref approveSpendPool.Add(upgradeEntity);
 			upgradeRequest.Target = targetEntity;

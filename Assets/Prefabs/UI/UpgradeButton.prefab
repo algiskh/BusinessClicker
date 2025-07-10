@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 3572752122657782655}
   - component: {fileID: 6180194579342675442}
   - component: {fileID: 3447035496635395291}
+  - component: {fileID: 3388580667558102715}
   m_Layer: 5
   m_Name: UpgradeButton
   m_TagString: Untagged
@@ -212,10 +213,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 853e558bf8776854f9b506b3ec7b9622, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _upgradeButton: {fileID: 0}
-  _titleText: {fileID: 0}
-  _incomeText: {fileID: 0}
-  _priceText: {fileID: 0}
+  _upgradeButton: {fileID: 3388580667558102715}
+  _titleText: {fileID: 260086948250014794}
+  _incomeText: {fileID: 5965278891715621206}
+  _priceText: {fileID: 7371879743098846374}
 --- !u!114 &3572752122657782655
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,6 +317,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &3388580667558102715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3738346708381681765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9ce1695910de049890d4854f310a91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _button: {fileID: 6180194579342675442}
 --- !u!1 &4171832269146282690
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,18 +1,25 @@
-using BusinessGame.Configs;
 using BusinessGame.UI;
-using System;
+using System.Collections.Generic;
+using ConfigHolder = BusinessGame.Configs.ConfigHolder;
+using Config = BusinessGame.Configs.Config;
+using UpgradeConfig = BusinessGame.Configs.Config.UpgradeConfig;
+
 
 namespace BusinessGame.ECS.Components
 {
 	#region StartComponents
 	public struct ConfigHolderComponent
 	{
-		public Configs.ConfigHolder ConfigHolder;
+		public ConfigHolder ConfigHolder;
 	}
 
 	public struct ConfigComponent
 	{
-		public Configs.Config config;
+		public Config Value;
+	}
+	public struct Upgrades
+	{
+		public UpgradeConfig[] Value;
 	}
 
 	public struct ObjectsParent
@@ -22,7 +29,7 @@ namespace BusinessGame.ECS.Components
 
 	public struct BusinessViewComponent
 	{
-		public BusinessView View;
+		public BusinessView Value;
 	}
 	#endregion
 
@@ -55,13 +62,6 @@ namespace BusinessGame.ECS.Components
 		public float progress;
 	}
 
-	public struct Upgrade
-	{
-		public bool IsObtained;
-		public float Multiplier;
-		public int Price;
-	}
-
 	public struct LevelButtonWrapper
 	{
 		public ButtonWrapper buttonWrapper;
@@ -84,14 +84,20 @@ namespace BusinessGame.ECS.Components
 
 	public struct RequestSpendSoft
 	{
-		public int Amount;
-		public int Target;
+		public long Amount;
+		public int TargetEntity;
+		public SpendPurpose Purpose;
+		public int AdditionalTarget; // Optional, used for upgrades
+
+		public bool IsApproved;
 	}
 
 	public struct ApproveSpendSoft
 	{
-		public int Amount;
+		public long Amount;
 		public int Target;
+		public SpendPurpose Purpose;
+		public int AdditionalTarget;
 	}
 
 	public struct UpgradeRequest
@@ -109,17 +115,14 @@ namespace BusinessGame.ECS.Components
 		public TopPanel Value;
 	}
 
+	public struct UpdateViewRequest
+	{
+		public int Target;
+	}
+
 	public struct Timer
 	{
 		public float Value;
 		public int Target;
 	}
-
-	#region Events
-	public struct OnTimerFinish
-	{
-		public int Target;
-	}
-
-#endregion
 }

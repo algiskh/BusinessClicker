@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace BusinessGame.UI
 {
-    public abstract class ButtonWrapper : MonoBehaviour
+    public class ButtonWrapper : MonoBehaviour
 	{
         public bool IsClicked { get; private set; }
         [SerializeField] private Button _button;

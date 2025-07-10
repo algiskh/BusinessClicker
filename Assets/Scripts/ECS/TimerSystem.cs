@@ -16,6 +16,7 @@ namespace BusinessGame.ECS
 
 			foreach (var entity in timerFilter)
 			{
+				Debug.Log($"Iterate timer for entity {entity}");
 				var level = levelPool.Get(entity);
 
 				if (level.Value < 1)

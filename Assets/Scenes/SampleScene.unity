@@ -424,7 +424,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _configHolder: {fileID: 11400000, guid: 5a692200a13c899459951d6dd699724f, type: 2}
   _slotsParent: {fileID: 1712196764}
-  _topPanel: {fileID: 0}
+  _topPanel: {fileID: 998189246}
 --- !u!4 &547517583
 Transform:
   m_ObjectHideFlags: 0
@@ -629,6 +629,7 @@ GameObject:
   - component: {fileID: 998189243}
   - component: {fileID: 998189245}
   - component: {fileID: 998189244}
+  - component: {fileID: 998189246}
   m_Layer: 5
   m_Name: TopPanel
   m_TagString: Untagged
@@ -694,6 +695,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 998189242}
   m_CullTransparentMesh: 1
+--- !u!114 &998189246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998189242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae2de69668e1f9143b94397e2d500d67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: {fileID: 205560271}
 --- !u!1 &1370109381
 GameObject:
   m_ObjectHideFlags: 0
@@ -1156,7 +1170,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 691178870}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999817
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

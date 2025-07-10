@@ -1,19 +1,23 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace BusinessGame.Configs
 {
-    [CreateAssetMenu(
-		fileName = "BusinessConfig",
-		menuName = "Configs/BusinessConfig", order = 1
-		)]
+	[CreateAssetMenu(
+		   fileName = "BusinessConfig",
+		   menuName = "Configs/BusinessConfig", order = 1
+		   )]
 	public class Config : ScriptableObject
-    {
+	{
 		[Serializable]
-		private class Upgrade
+		public struct UpgradeConfig 
 		{
-			public float Price;
+			[NonSerialized] public bool IsObtained;
+			[NonSerialized] public int Hash;
+			public long Price;
 			public float Multiplier;
 		}
 
@@ -21,20 +25,28 @@ namespace BusinessGame.Configs
 		[SerializeField] private float _baseDelay;
 		[SerializeField] private long _baseCost;
 		[SerializeField] private long _baseIncome;
-		[SerializeField] private Upgrade[] _upgrades = new Upgrade[2];
+		[SerializeField] private UpgradeConfig[] _upgrades = new UpgradeConfig[2];
 
 		public string Id => _id;
-        public float Delay => _baseDelay;
+		public float Delay => _baseDelay;
 		public long BaseCost => _baseCost;
 		public long BaseIncome => _baseIncome;
-		public long Income (int level) => (long)(level * _baseIncome * (1 + _upgrades.Sum(b => b.Multiplier)));
+		public UpgradeConfig[] Upgrades => _upgrades;
+
+		public long GetIncome(int level, IEnumerable<UpgradeConfig> upgrades)
+		{
+			var upgradesMultiplier = 1 + upgrades.Where(u => u.IsObtained).Sum(b => b.Multiplier);
+			return (long)(level * _baseIncome * upgradesMultiplier);
+		}
+
 		public long LevelUpPrice(int level)
 		{
-			if (level < 1 || level > _upgrades.Length)
-			{
-				return _baseCost;
-			}
-			return (long)(_baseCost * _upgrades[level - 1].Price);
+			return (long)(_baseCost * (level + 1));
+		}
+
+		public UpgradeConfig[] GetUpgradesCopy()
+		{
+			return _upgrades.ToArray();
 		}
 	}
 }

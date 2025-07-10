@@ -8,8 +8,8 @@ using UnityEngine;
 
 public class EntryPoint : MonoBehaviour
 {
-    [SerializeField] private ConfigHolder _configHolder;
-    [SerializeField] private Transform _slotsParent;
+	[SerializeField] private ConfigHolder _configHolder;
+	[SerializeField] private Transform _slotsParent;
 	[SerializeField] private TopPanel _topPanel;
 
 	private EcsWorld _world;
@@ -26,12 +26,17 @@ public class EntryPoint : MonoBehaviour
 			.Add(new SaveLoadSystem())
 			.Add(new SpawnSystem())
 			.Add(new BusinessSystem())
-			.Add(new TimerSystem())
 			.Add(new SoftCurrencySystem())
 			.Add(new UISystem())
 
 			.Init();
 	}
+
+	private void Update()
+	{
+		_systems?.Run();
+	}
+
 
 	private void SetupSpawnData()
 	{
@@ -47,6 +52,7 @@ public class EntryPoint : MonoBehaviour
 
 		config.ConfigHolder = _configHolder;
 		parent.Parent = _slotsParent;
+		topPanel.Value = _topPanel;
 	}
 
 	private void OnDestroy()

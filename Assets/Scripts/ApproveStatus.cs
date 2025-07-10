@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum SpendPurpose
+public enum ApproveStatus
 {
-	None,
-	Upgrade,
-	LevelUp
+Pending,
+Approved,
+Disposed
 }

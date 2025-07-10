@@ -26,12 +26,13 @@ public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не
 	{
 		var configHolderPool = world.GetPool<ConfigHolderComponent>();
 		var configPool = world.GetPool<ConfigComponent>();
+		var businessViewPool = world.GetPool<BusinessViewComponent>();
+		var upgradesPool = world.GetPool<Upgrades>();
 
 		var parentPool = world.GetPool<ObjectsParent>();
 		var timerPool = world.GetPool<Timer>();
 		var incomePool = world.GetPool<Income>();
 		var levelPool = world.GetPool<Level>();
-
 
 		var configHolderComponent = configHolderPool.Get(configEntity);
 		var objectsParentComponent = parentPool.Get(configEntity);
@@ -45,14 +46,30 @@ public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не
 				objectsParentComponent.Parent);
 
 			ref var configComponent = ref configPool.Add(businessEntity);
-			configComponent.config = config;
+			configComponent.Value = config;
 
 			ref var timer = ref timerPool.Add(businessEntity);
 			timer.Value = config.Delay;
 
 			ref var income = ref incomePool.Add(businessEntity);
-			
+			income.Value = config.BaseIncome;
+
 			ref var level = ref levelPool.Add(businessEntity);
+
+			ref var businessViewComponent = ref businessViewPool.Add(businessEntity);
+
+			businessViewComponent.Value = businessView;
+
+			ref var upgrades = ref upgradesPool.Add(businessEntity);
+			upgrades.Value = config.GetUpgradesCopy();
+
+			for (var i = 0; i < upgrades.Value.Length; i++)
+			{
+				upgrades.Value[i].Hash = businessView.UpgradeViews[i] != null
+					? businessView.UpgradeViews[i].Hash
+					: -1;
+				businessViewComponent.Value.UpgradeViews[i].Init(upgrades.Value[i], "TITLE");
+			}
 
 			businessView.Initialize(businessEntity, world, config);
 		}
