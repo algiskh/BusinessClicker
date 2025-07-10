@@ -41,5 +41,12 @@ namespace BusinessGame.ECS
 				world.DelEntity(entity);
 			}
 		}
+
+		public static ref T CreateEventEntity<T>(this EcsWorld world) where T : struct
+		{
+			var pool = world.GetPool<T>();
+			var entity = world.NewEntity();
+			return ref pool.Add(entity);
+		}
 	}
 }

@@ -4,8 +4,6 @@ using Config = BusinessGame.Configs.Config;
 using UpgradeConfig = BusinessGame.Configs.Config.UpgradeConfig;
 using BusinessGame.Serialization;
 
-
-
 namespace BusinessGame.ECS.Components
 {
 	#region StartComponents
@@ -98,11 +96,6 @@ namespace BusinessGame.ECS.Components
 		public int Target;
 		public SpendPurpose Purpose;
 		public int AdditionalTarget;
-	}
-
-	public struct UpgradeRequest
-	{
-		public int Target;
 	}
 
 	public struct UpdateSoftUI

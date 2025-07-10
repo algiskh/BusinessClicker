@@ -1,7 +1,6 @@
 using Leopotam.EcsLite;
 using BusinessGame.ECS.Components;
 using System.Collections.Generic;
-using Unity.Collections;
 
 namespace BusinessGame.ECS
 {
@@ -86,10 +85,7 @@ namespace BusinessGame.ECS
 
 		private void SendUIUpdate(EcsWorld world, long soft)
 		{
-			var updateSoftPool = world.GetPool<UpdateSoftUI>();
-
-			var updateSoftUIEntity = world.NewEntity();
-			ref var upgradeRequest = ref updateSoftPool.Add(updateSoftUIEntity);
+			ref var upgradeRequest = ref world.CreateEventEntity<UpdateSoftUI>();
 			upgradeRequest.Value = soft;
 		}
 

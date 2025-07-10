@@ -4,7 +4,6 @@ using Leopotam.EcsLite;
 using BusinessGame.ECS.Components;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SocialPlatforms;
 
 namespace BusinessGame.UI
 {

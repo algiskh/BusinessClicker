@@ -1,4 +1,3 @@
-using BusinessGame.Configs;
 using BusinessGame.ECS.Components;
 using Leopotam.EcsLite;
 using System.Collections.Generic;
@@ -53,6 +52,9 @@ namespace BusinessGame.ECS
 
 				ref var currency = ref world.GetAsSingleton<SoftCurrency>();
 				currency.Value = saveData.SoftCurrency;
+
+				ref var upgradeRequest = ref world.CreateEventEntity<UpdateSoftUI>();
+				upgradeRequest.Value = currency.Value;
 
 				var loadedDataEntity = world.NewEntity();
 				ref var loadedData = ref world.GetPool<LoadedDataComponent>().Add(loadedDataEntity);

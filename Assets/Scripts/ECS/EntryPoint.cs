@@ -1,9 +1,7 @@
 using BusinessGame.Configs;
 using BusinessGame.ECS;
 using BusinessGame.ECS.Components;
-using BusinessGame.UI;
 using Leopotam.EcsLite;
-using Unity.VisualScripting;
 using UnityEngine;
 
 

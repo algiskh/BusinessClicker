@@ -1,5 +1,4 @@
 using BusinessGame.ECS.Components;
-using BusinessGame.UI;
 using Leopotam.EcsLite;
 using System.Collections.Generic;
 
@@ -16,7 +15,7 @@ namespace BusinessGame.ECS
 			UpdateTopPanelIfNeeded(world);
 
 			var updateViewPool = world.GetPool<UpdateViewRequest>();
-			bool updateAll = ShouldUpdateAllViews(world, updateViewPool, out var entitiesToUpdate);
+			bool updateAll = UpdateAllViews(world, updateViewPool, out var entitiesToUpdate);
 
 			UpdateBusinessViews(world, updateAll, entitiesToUpdate);
 
@@ -33,7 +32,7 @@ namespace BusinessGame.ECS
 			}
 		}
 
-		private bool ShouldUpdateAllViews(EcsWorld world, EcsPool<UpdateViewRequest> updateViewPool, out HashSet<int> entitiesToUpdate)
+		private bool UpdateAllViews(EcsWorld world, EcsPool<UpdateViewRequest> updateViewPool, out HashSet<int> entitiesToUpdate)
 		{
 			entitiesToUpdate = new HashSet<int>();
 			bool isGlobal = false;
@@ -97,7 +96,6 @@ namespace BusinessGame.ECS
 				var upgradeView = upgradeViews[i];
 				if (upgradeView.UpgradeButton.IsClicked)
 				{
-					UnityEngine.Debug.Log($"Клик по кнопке Upgrade для {config.Value.Id} (уровень {level.Value}) для {entity}");
 					int request = world.NewEntity();
 					ref var requestSpend = ref requestSpendPool.Add(request);
 					requestSpend.Amount = upgradeView.Config.Price;
@@ -123,7 +121,6 @@ namespace BusinessGame.ECS
 
 			if (levelUpButton.IsClicked)
 			{
-				UnityEngine.Debug.Log($"Клик по кнопке LevelUp для {config.Value.Id} (уровень {level.Value}) для {entity}");
 				int request = world.NewEntity();
 				ref var requestSpend = ref requestSpendPool.Add(request);
 				requestSpend.Amount = config.Value.LevelUpPrice(level.Value);
