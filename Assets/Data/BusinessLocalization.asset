@@ -28,13 +28,13 @@ MonoBehaviour:
   - Key: Business_1_Upgrade_1
     Text: 24/7 mode
   - Key: Business_2_Upgrade_0
-    Text: Overtime shifts
+    Text: Overtime Shifts
   - Key: Business_2_Upgrade_1
     Text: Luminous Sign
   - Key: Business_3_Upgrade_0
-    Text: Luminous sign
+    Text: Luminous Sign
   - Key: Business_3_Upgrade_1
-    Text: Technical support
+    Text: Technical Support
   - Key: Business_4_Upgrade_0
     Text: Marketing
   - Key: Business_4_Upgrade_1

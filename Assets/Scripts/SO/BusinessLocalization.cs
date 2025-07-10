@@ -1,6 +1,5 @@
 using BusinessGame.Configs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -16,7 +15,6 @@ namespace BusinessGame.UI
 		public struct Entry
 		{
 			public string Key;
-			[TextArea]
 			public string Text; // Default EN text
 		}
 

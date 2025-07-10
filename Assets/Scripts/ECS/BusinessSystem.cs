@@ -1,4 +1,3 @@
-using BusinessGame.Configs;
 using BusinessGame.ECS.Components;
 using Leopotam.EcsLite;
 using System.Collections.Generic;

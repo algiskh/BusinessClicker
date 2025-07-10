@@ -1,4 +1,3 @@
-using BusinessGame.ECS.Components;
 using BusinessGame.UI;
 using TMPro;
 using UnityEngine;

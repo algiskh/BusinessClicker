@@ -29,7 +29,6 @@ namespace BusinessGame.Configs
 
 		public string Id => _id;
 		public float Delay => _baseDelay;
-		public long BaseCost => _baseCost;
 		public long BaseIncome => _baseIncome;
 		public UpgradeConfig[] Upgrades => _upgrades;
 

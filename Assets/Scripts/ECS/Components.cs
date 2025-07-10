@@ -32,6 +32,10 @@ namespace BusinessGame.ECS.Components
 	{
 		public BusinessView Value;
 	}
+	public struct TopPanelComponent
+	{
+		public TopPanel Value;
+	}
 	#endregion
 
 	#region SaveLoadComponents
@@ -49,6 +53,12 @@ namespace BusinessGame.ECS.Components
 	}
 	#endregion
 
+	#region BusinessComponents
+	public struct Timer
+	{
+		public float Value;
+		public int Target;
+	}
 	public struct Level
 	{
 		public int Value;
@@ -59,37 +69,25 @@ namespace BusinessGame.ECS.Components
 		public long Value;
 	}
 
-	public struct IncomeProgress
+	public struct SoftCurrency
 	{
-		public float progress;
+		public long Value;
 	}
+	#endregion
 
-	public struct LevelButtonWrapper
-	{
-		public ButtonWrapper buttonWrapper;
-	}
-
-	public struct UpgradeButtonWrapper
-	{
-		public ButtonWrapper buttonWrapper;
-	}
-
+	#region Requests
 	public struct AddSoftRequest
 	{
 		public long Amount;
 	}
 
-	public struct SoftCurrency
-	{
-		public long Value;
-	}
 
 	public struct RequestSpendSoft
 	{
 		public long Amount;
 		public int TargetEntity;
 		public SpendPurpose Purpose;
-		public int AdditionalTarget; // Optional, used for upgrades
+		public int AdditionalTarget;
 
 		public bool IsApproved;
 	}
@@ -104,7 +102,7 @@ namespace BusinessGame.ECS.Components
 
 	public struct UpgradeRequest
 	{
-		public int Target; // Entity ID of the target that will receive the currency
+		public int Target;
 	}
 
 	public struct UpdateSoftUI
@@ -112,20 +110,10 @@ namespace BusinessGame.ECS.Components
 		public long Value;
 	}
 
-	public struct TopPanelComponent
-	{
-		public TopPanel Value;
-	}
-
 	public struct UpdateViewRequest
 	{
 		public bool IsGlobal;
 		public int Target;
 	}
-
-	public struct Timer
-	{
-		public float Value;
-		public int Target;
-	}
+	#endregion
 }

@@ -3,7 +3,7 @@ using Leopotam.EcsLite;
 using UnityEngine;
 using Timer = BusinessGame.ECS.Components.Timer;
 
-public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не нужен
+public class SpawnSystem : IEcsInitSystem
 {
 	public void Init(IEcsSystems systems)
 	{
@@ -16,9 +16,7 @@ public class SpawnSystem : IEcsInitSystem // Можно убрать IEcsRunSystem, если не
 		foreach (var entity in filter)
 		{
 			CreateInitialSlots(world, entity);
-
-			//world.DelEntity(entity);
-			break; // Допустимо, если уверены, что entity ровно один
+			break;
 		}
 	}
 
