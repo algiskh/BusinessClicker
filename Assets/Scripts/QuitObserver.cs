@@ -31,7 +31,6 @@ public class QuitObserver : MonoBehaviour
 	{
 		if (_world != null)
 		{
-			Debug.Log($"Try to save!");
 			var entity = _world.NewEntity();
 			var requestSave = _world.GetPool<OnRequestSave>().Add(entity);
 		}
