@@ -18,9 +18,9 @@ public class SafeAreaTopShifter : MonoBehaviour
 		Rect safe = Screen.safeArea;
 		RectTransform rt = GetComponent<RectTransform>();
 		Canvas canvas = GetComponentInParent<Canvas>();
-		float scale = canvas ? canvas.scaleFactor : 1f;
+		var scale = canvas ? canvas.scaleFactor : 1f;
 
-		float insetTop = (Screen.height - (safe.y + safe.height)) / scale;
+		var insetTop = (Screen.height - (safe.y + safe.height)) / scale;
 
 		Vector2 min = rt.offsetMin;
 		Vector2 max = rt.offsetMax;
@@ -29,13 +29,13 @@ public class SafeAreaTopShifter : MonoBehaviour
 		rt.offsetMin = min;
 		rt.offsetMax = max;
 
-		float topPanelHeight = rt.rect.height;
+
 		var offset = _scrollView.offsetMin;
-		offset.y = 0; // bottom
+		offset.y = 0;
 		_scrollView.offsetMin = offset;
 
 		offset = _scrollView.offsetMax;
-		offset.y = -topPanelHeight; // top
+		offset.y = -rt.rect.height - insetTop;
 		_scrollView.offsetMax = offset;
 	}
 }
