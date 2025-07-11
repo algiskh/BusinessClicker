@@ -75,6 +75,7 @@ namespace BusinessGame.ECS
 			var approveFilter = world.Filter<RequestSpendSoft>().End();
 			var approvesToRemove = new List<int>();
 
+			bool hasAnyApprove = false;
 			foreach (var approveEntity in approveFilter)
 			{
 				var approve = approvePool.Get(approveEntity);
@@ -82,7 +83,7 @@ namespace BusinessGame.ECS
 
 				if (!approve.IsApproved)
 					continue;
-
+				hasAnyApprove = true;
 				var targetEntity = approve.TargetEntity;
 				ref var income = ref incomePool.Get(targetEntity);
 				ref var targetLevel = ref levelPool.Get(targetEntity);
@@ -105,10 +106,14 @@ namespace BusinessGame.ECS
 						break;
 				}
 
+				if (hasAnyApprove)
+				{
+					ref var saveRequest = ref world.CreateEventEntity<RequestSave>();
+				}
+
 				income.Value = configPool.Get(targetEntity).Value.GetIncome(targetLevel.Value, upgrades.Value);
 
-				var updateRequestEntity = world.NewEntity();
-				ref var updateRequest = ref updateViewPool.Add(updateRequestEntity);
+				ref var updateRequest = ref world.CreateEventEntity<UpdateViewRequest>();
 				updateRequest.Target = targetEntity;
 			}
 
@@ -146,6 +151,7 @@ namespace BusinessGame.ECS
 			var configPool = world.GetPool<ConfigComponent>();
 			var levelPool = world.GetPool<Level>();
 			var timerPool = world.GetPool<Timer>();
+			var incomePool = world.GetPool<Income>();
 			var upgradesPool = world.GetPool<Upgrades>();
 
 			var businessEntitiesById = new Dictionary<string, int>();
@@ -190,9 +196,15 @@ namespace BusinessGame.ECS
 						upgrades.Value[i].IsObtained = (i < business.Upgrades.Length) && business.Upgrades[i];
 					}
 				}
+
+				ref var income = ref incomePool.Get(entity);
+				income.Value = configPool.Get(entity).Value.GetIncome(level.Value, upgrades.Value);
+
+				ref var updateRequest = ref world.CreateEventEntity<UpdateViewRequest>();
+				updateRequest.Target = entity;
 			}
 
-			Debug.Log($"Save loaded (entities updated)");
+			Debug.Log($"Save loaded");
 		}
 
 		private void SetStartParameters(EcsWorld world)

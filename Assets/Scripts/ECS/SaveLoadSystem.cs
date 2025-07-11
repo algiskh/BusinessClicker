@@ -14,6 +14,9 @@ namespace BusinessGame.ECS
 		public void Init(IEcsSystems systems)
 		{
 			var world = systems.GetWorld();
+			ref var saveCooldown = ref world.CreateEventEntity<SaveCooldown>();
+			saveCooldown.UntilTime = 0;
+
 			TryToLoad(world);
 		}
 
@@ -21,10 +24,11 @@ namespace BusinessGame.ECS
 		{
 			var world = systems.GetWorld();
 
-			if (world.TryGetAsSingleton<OnRequestSave>(out _))
+			if (world.TryGetAsSingleton<RequestSave>(out var saverequest))
 			{
-				world.DeleteAllWith<OnRequestSave>();
-				TryToSave(world);
+				var ignoreSave = saverequest.IgnoreCooldown;
+				world.DeleteAllWith<RequestSave>();
+				TryToSave(world, ignoreSave);
 			}
 		}
 
@@ -67,10 +71,23 @@ namespace BusinessGame.ECS
 			}
 		}
 
-		public void TryToSave(EcsWorld world)
+		public void TryToSave(EcsWorld world, bool ignoreCooldown)
 		{
-			Debug.Log($"Try to save from ECS!");
+
 			var configHolder = world.GetAsSingleton<ConfigHolderComponent>();
+
+			ref var saveCooldown = ref world.GetAsSingleton<SaveCooldown>();
+
+			if (saveCooldown.UntilTime > Time.time && !ignoreCooldown)
+			{
+
+				return;
+			}
+			else
+			{
+				saveCooldown.UntilTime = Time.time + configHolder.Value.SaveCoolDown;
+			}
+
 			var savePath = configHolder.Value.SavePath;
 
 			var currency = world.GetAsSingleton<SoftCurrency>();
@@ -115,7 +132,6 @@ namespace BusinessGame.ECS
 			{
 				var json = JsonUtility.ToJson(newSave, true);
 				File.WriteAllText(savePath, json);
-				Debug.Log($"Save complete: {savePath}");
 			}
 			catch (System.Exception ex)
 			{

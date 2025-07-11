@@ -37,17 +37,23 @@ namespace BusinessGame.ECS.Components
 	#endregion
 
 	#region SaveLoadComponents
-	public struct OnRequestSave
+	public struct RequestSave
 	{
-	}
-
-	public struct OnRequestLoad
-	{
+		public bool IgnoreCooldown;
 	}
 
 	public struct LoadedDataComponent
 	{
 		public SerializationData Value;
+	}
+	public struct SaveCooldown
+	{
+		public float UntilTime;
+	}
+
+	public struct AutoSaveTimer
+	{
+		public float NextSaveTime;
 	}
 	#endregion
 

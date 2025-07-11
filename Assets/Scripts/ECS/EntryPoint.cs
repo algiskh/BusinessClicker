@@ -28,6 +28,7 @@ public class EntryPoint : MonoBehaviour
 			.Add(new SpawnSystem())
 			.Add(new SoftCurrencySystem())
 			.Add(new SaveLoadSystem())
+			.Add(new AutoSaveSystem())
 			.Add(new BusinessSystem())
 			.Add(new UISystem())
 

@@ -32,7 +32,8 @@ public class QuitObserver : MonoBehaviour
 		if (_world != null)
 		{
 			var entity = _world.NewEntity();
-			var requestSave = _world.GetPool<OnRequestSave>().Add(entity);
+			ref var requestSave = ref _world.GetPool<RequestSave>().Add(entity);
+			requestSave.IgnoreCooldown = true;
 		}
 	}
 

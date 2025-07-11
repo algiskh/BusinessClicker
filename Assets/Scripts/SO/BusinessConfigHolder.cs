@@ -22,12 +22,17 @@ namespace BusinessGame.Configs
 		[SerializeField] private Config[] _configs;
 		[SerializeField] private FirstTimeData _firstTimeData;
 		[SerializeField] private BusinessView _prefab;
+		[Header("Save Settings")]
 		[SerializeField] private string _saveName = "save.json";
+		[SerializeField] private float _saveCooldown = 3f;
+		[SerializeField] private float _autoSaveCooldown = 6f;
 
 		public Config[] Configs => _configs;
 		public BusinessView Prefab => _prefab;
 		public FirstTimeData FirstPlayData => _firstTimeData;
 		public string SavePath => Path.Combine(Application.persistentDataPath, _saveName);
+		public float SaveCoolDown => _saveCooldown;
+		public float AutoSaveCoolDown => _autoSaveCooldown;
 
 		public string GetTitle(Config config)
 		{
