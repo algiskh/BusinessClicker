@@ -32,9 +32,14 @@ namespace BusinessGame.ECS
 		private void IterateCurrency(EcsWorld world, int entity, EcsPool<SoftCurrency> currencyPool)
 		{
 			ref var currency = ref currencyPool.Get(entity);
-			var change = TryAddSoft(world) - TrySpendSoft(world, currency.Value);
+			var change = TryAddSoft(world);
 
 			currency.Value += change;
+
+			change = -TrySpendSoft(world, currency.Value);
+
+			currency.Value -= change;
+
 			if (change != 0)
 			{
 				SendUIUpdate(world, currency.Value);
